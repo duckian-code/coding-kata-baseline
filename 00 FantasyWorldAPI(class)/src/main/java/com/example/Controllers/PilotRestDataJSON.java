@@ -2,6 +2,7 @@ package com.example.Controllers;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -11,56 +12,87 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import org.springframework.stereotype.Service;
 
-public class PilotRestDataJSON {
+public class PilotRestDataJSON implements PilotDataStrategy {
 
     private static final File jsonFile = new File("src/main/resources/Database/pilot.json");
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    public static synchronized String add(Pilot pilot) throws IOException {
-        List<Pilot> pilots = getAllInternal();
-        int nextId = getNextId(pilots);
-        pilot.setPilot_id(nextId);
-        pilots.add(pilot);
-        saveFile(pilots);
-        return "Pilot added";
-    }
-
-    public static synchronized ArrayList<Pilot> getAll() throws IOException {
-        return new ArrayList<>(getAllInternal());
-    }
-
-    public static synchronized Pilot getById(int pilot_id) throws IOException {
-        for (Pilot pilot : getAllInternal()) {
-            if (pilot.getPilot_id() == pilot_id) {
-                return pilot;
-            }
-        }
-        return null;
-    }
-
-    public static synchronized void update(Pilot pilot) throws IOException {
-        ArrayList<Pilot> pilots = getAll();
-        for (Pilot p : pilots) {
-            if(p.getPilot_id() == pilot.getPilot_id()){
-                p.setName(pilot.getName());
-                p.setSkill_level(pilot.getSkill_level());
-                saveFile(pilots);
-            }
+    @Override
+    public String add(Pilot pilot) {
+        try {
+            List<Pilot> pilots = getAllInternal();
+            int nextId = getNextId(pilots);
+            pilot.setPilot_id(nextId);
+            pilots.add(pilot);
+            saveFile(pilots);
+            return "Pilot added";
+        } catch (IOException exception) {
+            throw new UncheckedIOException("Could not save pilot data", exception);
         }
     }
 
-    public static synchronized void deleteById(int pilot_id) throws IOException {
-        ArrayList<Pilot> pilots = getAll();
-        for (Pilot p : pilots) {
-            if(p.getPilot_id() == pilot_id){
-                pilots.remove(p);
-                saveFile(pilots);
-            }
+    @Override
+    public ArrayList<Pilot> getAll() {
+        try {
+            return new ArrayList<>(getAllInternal());
+        } catch (IOException exception) {
+            throw new UncheckedIOException("Could not get pilot data", exception);
         }
     }
 
-    private static List<Pilot> getAllInternal() throws IOException {
+    @Override
+    public Pilot getById(int pilot_id) {
+        try {
+            for (Pilot pilot : getAllInternal()) {
+                if (pilot.getPilot_id() == pilot_id) {
+                    return pilot;
+                }
+            }
+            return null;
+        } catch (IOException exception) {
+            throw new UncheckedIOException("Could not get pilot data", exception);
+        }
+    }
+
+    @Override
+    public Pilot update(Pilot pilot) {
+        try {
+            ArrayList<Pilot> pilots = getAll();
+            for (Pilot p : pilots) {
+                if(p.getPilot_id() == pilot.getPilot_id()){
+                    p.setName(pilot.getName());
+                    p.setSkill_level(pilot.getSkill_level());
+                    saveFile(pilots);
+                    return pilot;
+                }
+            }
+            return null;
+        } catch (IOException exception) {
+            throw new UncheckedIOException("Could not get pilot data", exception);
+        }
+    }
+
+    @Override
+    public String deleteById(int pilot_id) {
+        try {
+            ArrayList<Pilot> pilots = getAll();
+            for (Pilot p : pilots) {
+                if(p.getPilot_id() == pilot_id){
+                    pilots.remove(p);
+                    saveFile(pilots);
+                    return "Removed";
+                }
+            }
+
+            return "Not Found";
+        } catch (IOException exception) {
+            throw new UncheckedIOException("Could not get pilot data", exception);
+        }
+    }
+
+    private List<Pilot> getAllInternal() throws IOException {
         if (!jsonFile.exists() || jsonFile.length() == 0) {
             // No data yet, just return an empty list
             return new ArrayList<>();
@@ -79,7 +111,7 @@ public class PilotRestDataJSON {
         }
     }
 
-    private static int getNextId(List<Pilot> pilots) {
+    private int getNextId(List<Pilot> pilots) {
         if (pilots.isEmpty()) {
             return 1;
         }
@@ -90,7 +122,7 @@ public class PilotRestDataJSON {
                 .orElse(0) + 1;
     }
 
-    private static void saveFile(List<Pilot> pilots) throws IOException {
+    private void saveFile(List<Pilot> pilots) throws IOException {
         // Ensure directory exists
         File parent = jsonFile.getParentFile();
         if (parent != null && !parent.exists()) {
