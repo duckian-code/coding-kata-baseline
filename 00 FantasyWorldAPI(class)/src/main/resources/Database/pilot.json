@@ -1,0 +1,21 @@
+[ {
+  "pilot_id" : 1,
+  "name" : "chris",
+  "skill_level" : 10,
+  "spaceships" : [ ]
+}, {
+  "pilot_id" : 2,
+  "name" : "chris",
+  "skill_level" : 10,
+  "spaceships" : [ ]
+}, {
+  "pilot_id" : 3,
+  "name" : "chris",
+  "skill_level" : 10,
+  "spaceships" : [ ]
+}, {
+  "pilot_id" : 4,
+  "name" : "chris2",
+  "skill_level" : 4,
+  "spaceships" : [ ]
+} ]
