@@ -1,12 +1,16 @@
 package com.example.Controllers;
 
 import java.util.ArrayList;
+import java.util.List;
+
 import com.example.Models.*;
+import org.springframework.stereotype.Service;
 
-public class PilotRestDataArrayList {
-    private static final ArrayList<Pilot> pilots = new ArrayList<>();
+public class PilotRestDataArrayList implements PilotDataStrategy {
+    private final ArrayList<Pilot> pilots = new ArrayList<>();
 
-    public static String add(Pilot pilot) {
+    @Override
+    public String add(Pilot pilot) {
         if (pilots.stream().filter(i -> i.getPilot_id() == pilot.getPilot_id()).findFirst().orElse(null) == null) {
             pilots.add(pilot);
             return "Pilot Added";
@@ -15,15 +19,18 @@ public class PilotRestDataArrayList {
         }
     }
 
-    public static ArrayList<Pilot> getAll() {
+    @Override
+    public ArrayList<Pilot> getAll() {
         return pilots;
     }
 
-    public static Pilot getById(int id) {
+    @Override
+    public Pilot getById(int id) {
         return pilots.stream().filter(pilot -> pilot.getPilot_id() == id).findFirst().orElse(null);
     }
 
-    public static Pilot update(Pilot pilot) {
+    @Override
+    public Pilot update(Pilot pilot) {
         Pilot temp_pilot = pilots.stream().filter(i -> i.getPilot_id() == pilot.getPilot_id()).findFirst().orElse(null);
         if (temp_pilot != null) {
             pilots.remove(temp_pilot);
@@ -34,7 +41,8 @@ public class PilotRestDataArrayList {
         return null;
     }
 
-    public static String deleteById(int id) {
+    @Override
+    public String deleteById(int id) {
         return pilots.removeIf(pilot -> pilot.getPilot_id() == id) ? "Removed" : "Not Found";
     }
 }

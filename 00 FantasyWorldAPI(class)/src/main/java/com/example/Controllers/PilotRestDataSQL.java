@@ -5,11 +5,14 @@ import java.util.ArrayList;
 
 import com.example.Models.Pilot;
 import com.example.Models.Spaceship;
+import org.springframework.stereotype.Service;
 
 import static com.example.Controllers.PlanetRestDataArrayList.findById;
 
-public class PilotRestDataSQL {
-    public static String add(Pilot pilot) {
+public class PilotRestDataSQL implements PilotDataStrategy {
+
+    @Override
+    public String add(Pilot pilot) {
 
         if (findById(pilot.getPilot_id()) != null)
             return "Id Conflict";
@@ -34,7 +37,8 @@ public class PilotRestDataSQL {
         return "Pilot Added! " + String.valueOf(pilot.getPilot_id());
     }
 
-    public static Pilot findById(int id) {
+    @Override
+    public Pilot getById(int id) {
         String SQL = String.format("SELECT * FROM pilots WHERE (`pilot_id` = '%s');", id);
         Pilot pilot = null;
 
@@ -63,7 +67,8 @@ public class PilotRestDataSQL {
         return pilot;
     }
 
-    public static ArrayList<Pilot> getAll() {
+    @Override
+    public ArrayList<Pilot> getAll() {
         String SQL = String.format("SELECT * FROM pilots");
         ArrayList<Pilot> pilots = new ArrayList<>();
 
@@ -91,7 +96,8 @@ public class PilotRestDataSQL {
         return pilots;
     }
 
-    public static Pilot update(Pilot pilot) {
+    @Override
+    public Pilot update(Pilot pilot) {
         String SQL = String.format(
                 "UPDATE pilots SET `name` = '%s', `skill_level` = '%s' WHERE (`pilot_id` = '%s');",
                 pilot.getName(), pilot.getSkill_level(), pilot.getPilot_id());
@@ -118,7 +124,8 @@ public class PilotRestDataSQL {
 
     }
 
-    public static String deleteById(int id) {
+    @Override
+    public String deleteById(int id) {
         String SQL = String.format("DELETE FROM pilots WHERE pilot_id = %s;", id);
 
         try {
